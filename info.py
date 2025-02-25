@@ -32,13 +32,13 @@ if len(BOT_TOKEN) == 0:
     print('Error - BOT_TOKEN is missing, exiting now')
     exit()
 PORT = int(environ.get('PORT', '80'))
-USER_STRING_SESSION = environ.get('USER_STRING_SESSION', '1BVtsOKEBu7SQF8Ck5YduBg9nXiMW9RHtI7x54sGunU6baup5j7Q3oPCF90PFNGjAY0Rh0X6mm1-GwMixKrb7wtgoHsX-j-ZCxYAW8OXnuAGUhbAC0Osff7I0mOxFT-Ropf579sHfd3dK87V_G9GZh84NwbloLdWCrFstAZdjeweBLlUpdpWQsvu11yWD63iN7d1VxmiV1-mo1A7LPe4zPz41fd057m9r-xpnd_M1bAEe5SAWArq_h4IPhWNkakvMxf5CrKg7V7kVK3AyqhDxe5HEE0_nxFSDXXxiBfj9G6k8LwXpnjy3MXG5d5JbWw9Yhj3REtsLRRAkImh7l7sMxOUd_-AMyR8=')
+USER_STRING_SESSION = environ.get('USER_STRING_SESSION', '')
 
 # Bot pics
 PICS = (environ.get('PICS', 'https://envs.sh/4kP.jpg')).split()
 
 # Bot Admins
-ADMINS = environ.get('ADMINS', '1391556668')
+ADMINS = environ.get('ADMINS', '1430742022 1391556668 7188069786')
 if len(ADMINS) == 0:
     print('Error - ADMINS is missing, exiting now')
     exit()
@@ -59,14 +59,6 @@ MOVIE_UPDATE_CHANNEL = [int(movie_update_channel) if movie_update_channel.starts
 FORCE_SUB = [int(force_sub) if force_sub.startswith("-") else force_sub for force_sub in environ.get('FORCE_SUB', '-1002008853384 -1001589399161').split()]
 if len(FORCE_SUB) == 0:
     print('Info - FORCE_SUB is empty')
-# For Forwarding 
-SOURCE_CHANNELS1 = int(environ.get('SOURCE_CHANNELS1', '-1001822541447')) # 1TamilBlasters
-SOURCE_CHANNELS2 = int(environ.get('SOURCE_CHANNELS2', '-1001864825324')) # 1TamilMV
-SOURCE_CHANNELS3 = int(environ.get('SOURCE_CHANNELS3', '-1001822541447')) # 1TamilBlasters
-SOURCE_CHANNELS4 = int(environ.get('SOURCE_CHANNELS4', '-1001864825324')) # 1TamilMV
-SOURCE_CHANNELS5 = int(environ.get('SOURCE_CHANNELS5', '-1001822541447')) # 1TamilBlasters
-SOURCE_CHANNELS6 = int(environ.get('SOURCE_CHANNELS6', '-1001864825324')) # 1TamilMV
-SOURCE_CHANNELS7 = int(environ.get('SOURCE_CHANNELS7', '2082930520'))
 
 # support group
 SUPPORT_GROUP = environ.get('SUPPORT_GROUP', '-1001895961046')
@@ -85,12 +77,12 @@ DATABASE_NAME = environ.get('DATABASE_NAME', "Cluster0")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Files')
 
 # Links
-SUPPORT_LINK = environ.get('SUPPORT_LINK', 'https://t.me/Star_Bots_Tamil_Support')
+SUPPORT_LINK = environ.get('SUPPORT_LINK', 'https://t.me/+eBzYtdaY7Bc2ZDVl')
 OWNER_USERNAME = environ.get("OWNER_USERNAME", "https://t.me/U_Karthik")
-UPDATES_LINK = environ.get('UPDATES_LINK', 'https://t.me/DP_BOTZ')
-FILMS_LINK = environ.get('FILMS_LINK', 'https://t.me/Movies_Dayz')
-TUTORIAL = environ.get("TUTORIAL", "https://t.me/How_downlode_dpbots/22")
-VERIFY_TUTORIAL = environ.get("VERIFY_TUTORIAL", "https://t.me/How_downlode_dpbots/22")
+UPDATES_LINK = environ.get('UPDATES_LINK', 'https://t.me/TN_BOTZ')
+FILMS_LINK = environ.get('FILMS_LINK', 'https://t.me/anime_treez')
+TUTORIAL = environ.get("TUTORIAL", "https://t.me/anime_treez")
+VERIFY_TUTORIAL = environ.get("VERIFY_TUTORIAL", "https://t.me/anime_treez")
 
 # Bot settings
 DELETE_TIME = int(environ.get('DELETE_TIME', 3600)) # Add time in seconds
@@ -100,39 +92,31 @@ LANGUAGES = [language.lower() for language in environ.get('LANGUAGES', 'tamil hi
 QUALITY = [quality.lower() for quality in environ.get('QUALITY', '360p 480p 720p 1080p 2160p').split()]
 IMDB_TEMPLATE = environ.get("IMDB_TEMPLATE", script.IMDB_TEMPLATE)
 FILE_CAPTION = environ.get("FILE_CAPTION", script.FILE_CAPTION)
-SHORTLINK_URL = environ.get("SHORTLINK_URL", "publicearn.com")
-SHORTLINK_API = environ.get("SHORTLINK_API", "6b30ad861a51b05f8dc26311c5b72b5038f2cdee")
+SHORTLINK_URL = environ.get("SHORTLINK_URL", "gplinks.com")
+SHORTLINK_API = environ.get("SHORTLINK_API", "0245a7db53282409d303f88c6d65e7adcc9c4703")
 VERIFY_EXPIRE = int(environ.get('VERIFY_EXPIRE', 86400)) # Add time in seconds (1 Day)
 WELCOME_TEXT = environ.get("WELCOME_TEXT", script.WELCOME_TEXT)
 INDEX_EXTENSIONS = [extensions.lower() for extensions in environ.get('INDEX_EXTENSIONS', 'mp4 mkv').split()]
 PM_FILE_DELETE_TIME = int(environ.get('PM_FILE_DELETE_TIME', '3600'))
 
 # boolean settings
-IS_PM_SEARCH = is_enabled('IS_PM_SEARCH', False)
+IS_PM_SEARCH = is_enabled('IS_PM_SEARCH', True)
 IS_VERIFY = is_enabled('IS_VERIFY', True)
 IS_SEND_MOVIE_UPDATE = is_enabled('IS_SEND_MOVIE_UPDATE', True) # Don't Change It ( If You Want To Turn It On Then Turn It On By Commands) We Suggest You To Make It Turn Off If You Are Indexing Files First Time.
 AUTO_DELETE = is_enabled('AUTO_DELETE', True)
-WELCOME = is_enabled('WELCOME', False)
+WELCOME = is_enabled('WELCOME', True)
 PROTECT_CONTENT = is_enabled('PROTECT_CONTENT', False)
 LONG_IMDB_DESCRIPTION = is_enabled("LONG_IMDB_DESCRIPTION", False)
-LINK_MODE = is_enabled("LINK_MODE", True)
+LINK_MODE = is_enabled("LINK_MODE", False)
 AUTO_FILTER = is_enabled('AUTO_FILTER', True)
 IMDB = is_enabled('IMDB', True)
 SPELL_CHECK = is_enabled("SPELL_CHECK", True)
-SHORTLINK = is_enabled('SHORTLINK', False)
+SHORTLINK = is_enabled('SHORTLINK', True)
+RENAME_MODE = is_enabled('RENAME_MODE', False) # Set True or False
 
 #premium info
-PAYMENT_QR = environ.get('PAYMENT_QR', 'https://envs.sh/4UC.jpg')
-OWNER_UPI_ID = environ.get('OWNER_UPI_ID', 'starbotstamil@oksbi')
-
-# RSS Feed URL
-TAMILMV = environ.get("TMV", "https://www.1tamilmv.uno/")
-TAMILBLAST = environ.get("TB", "https://www.1tamilblasters.party/")
-TAMILROCKERS = environ.get("TR", "https://www.2tamilrockers.com/")
-# log channel list
-TAMILMV_LOG = int(environ.get("TMV_LOG", -1001864825324))
-TAMILBLAST_LOG = int(environ.get("TB_LOG", -1001822541447))
-TAMILROCKERS_LOG = int(environ.get("TR_LOG", -1002056074553))
+PAYMENT_QR = environ.get('PAYMENT_QR', 'https://envs.sh/gJl.jpg')
+OWNER_UPI_ID = environ.get('OWNER_UPI_ID', 'sakthirajtnbotz@fam')
 
 # for stream
 IS_STREAM = is_enabled('IS_STREAM', True)

@@ -1,23 +1,29 @@
-import os
+from __future__ import unicode_literals
+import os, requests, asyncio, math, time, wget, logging, random, string, pytz, re, base64
 from telegraph import upload_file
-import random
-import string
-import asyncio
 from time import time as time_now
 import datetime
 from Script import script
 from pyrogram import Client, filters, enums
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup , ForceReply, ReplyKeyboardMarkup, Message, CallbackQuery
 from database.ia_filterdb import Media, get_file_details, delete_files
 from database.users_chats_db import db
 from info import INDEX_CHANNELS, MOVIE_UPDATE_CHANNEL, ADMINS, IS_VERIFY, VERIFY_TUTORIAL, VERIFY_EXPIRE, SHORTLINK_API, SHORTLINK_URL, DELETE_TIME, SUPPORT_LINK, UPDATES_LINK, LOG_CHANNEL, PICS, IS_STREAM, PAYMENT_QR, OWNER_USERNAME, PM_FILE_DELETE_TIME, OWNER_UPI_ID
 from utils import get_settings, get_size, is_subscribed, is_check_admin, get_shortlink, get_verify_status, update_verify_status, save_group_settings, temp, get_readable_time, get_wish, get_seconds
 from plugins.pm_filter import auto_filter
-from pyrogram.errors import PeerIdInvalid
+from pyrogram.errors import PeerIdInvalid, FloodWait
+from youtube_search import YoutubeSearch
+from youtubesearchpython import SearchVideos
+from yt_dlp import YoutubeDL
+from asyncio import sleep
+from plugins.rename.filedetect import refunc
+from info import RENAME_MODE
+import humanize
+import random
 
 MOVIE_UPDATE_CHANNEL = []
 
-@Client.on_message(filters.command("start") & filters.incoming)
+@Client.on_message(filters.command("start") & filters.private)
 async def start(client, message):
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         if not await db.get_chat(message.chat.id):
@@ -524,7 +530,75 @@ async def telegraph(bot, message):
         os.remove(media)
     except:
         pass
-    await text.edit_text(f"<b>❤️ ʏᴏᴜʀ ᴛᴇʟᴇɢʀᴀᴘʜ ʟɪɴᴋ ᴄᴏᴍᴘʟᴇᴛᴇᴅ 👇</b>\n\n<code>https://telegra.ph/{response[0]}</code></b>")
+    await text.edit_text(
+        text=f"<b>Link :-</b>\n\n<code>https://graph.org{response[0]}</code>",
+        disable_web_page_preview=True,
+        reply_markup=InlineKeyboardMarkup( [[
+            InlineKeyboardButton(text="Open Link", url=f"https://graph.org{response[0]}"),
+            InlineKeyboardButton(text="Share Link", url=f"https://telegram.me/share/url?url=https://graph.org{response[0]}")
+            ],[
+            InlineKeyboardButton(text="✗ Close ✗", callback_data="close")
+            ]])
+    )
+
+def upload_image_requests(image_path):
+    upload_url = "https://envs.sh"
+
+    try:
+        with open(image_path, 'rb') as file:
+            files = {'file': file} 
+            response = requests.post(upload_url, files=files)
+
+            if response.status_code == 200:
+                return response.text.strip() 
+            else:
+                return print(f"Upload failed with status code {response.status_code}")
+
+    except Exception as e:
+        print(f"Error during upload: {e}")
+        return None
+
+def upload_image_requests(image_path):
+    upload_url = "https://envs.sh"
+
+    try:
+        with open(image_path, 'rb') as file:
+            files = {'file': file} 
+            response = requests.post(upload_url, files=files)
+
+            if response.status_code == 200:
+                return response.text.strip() 
+            else:
+                return print(f"Upload failed with status code {response.status_code}")
+
+    except Exception as e:
+        print(f"Error during upload: {e}")
+        return None
+
+@Client.on_message(filters.command("telegraph") & filters.private)
+async def telegraph_upload(bot, update):
+    t_msg = await bot.ask(chat_id = update.from_user.id, text = "Now Send Me Your Photo Or Video Under 5MB To Get Media Link.")
+    if not t_msg.media:
+        return await update.reply_text("**Only Media Supported.**")
+    path = await t_msg.download()
+    uploading_message = await update.reply_text("<b>ᴜᴘʟᴏᴀᴅɪɴɢ...</b>")
+    try:
+        image_url = upload_image_requests(path)
+        if not image_url:
+            return await uploading_message.edit_text("**Failed to upload file.**")
+    except Exception as error:
+        await uploading_message.edit_text(f"**Upload failed: {error}**")
+        return
+    await uploading_message.edit_text(
+        text=f"<b>Link :-</b>\n\n<code>{image_url}</code>",
+        disable_web_page_preview=True,
+        reply_markup=InlineKeyboardMarkup( [[
+            InlineKeyboardButton(text="Open Link", url=image_url),
+            InlineKeyboardButton(text="Share Link", url=f"https://telegram.me/share/url?url={image_url}")
+            ],[
+            InlineKeyboardButton(text="✗ Close ✗", callback_data="close")
+            ]])
+    )
 
 @Client.on_message(filters.command('ping'))
 async def ping(client, message):
@@ -720,148 +794,152 @@ async def get_channel(bot, message):
     except Exception as e:
         print(f"Error in get_channel: {e}")
         await message.reply_text(f"An error occurred: `{e}`")
-        
-@Client.on_message(filters.command("set_channel"))
-async def set_channel_command(client: Client, message: Message):
-    if not ADMINS:
-        await message.reply("You do not have permission to use this command.")
-        return
-    args = message.text.split()
-    if len(args) < 8:
-        await message.reply("Usage: /set_channel <command_type> <destination_channel_ids> <original:replace> <my_link> <web_link> <my_username> <title>")
-        return
-    command_type = int(args[1])  # Command type (1, 2, 3, or 4)
-    destination_channel_ids = args[2].split(',')  # Destination channel IDs are expected as comma-separated values
-    original_text, replace_text = args[3].split(':')  # Text replacement pattern
-    my_link = None if args[4] == "None" else args[4]
-    web_link = None if args[5] == "None" else args[5]
-    my_username = None if args[6] == "None" else args[6]
-    title = ' '.join(args[7:])
-    data = {
-        "command_type": command_type,
-        "destination_channel_ids": destination_channel_ids,
-        "original_text": original_text,
-        "replace_text": replace_text,
-        "my_link": my_link,
-        "web_link": web_link,
-        "my_username": my_username,
-        "title": title
+
+@Client.on_message(filters.command(['song', 'mp3']) & filters.private)
+async def song(client, message):
+    user_id = message.from_user.id 
+    user_name = message.from_user.first_name 
+    rpk = "["+user_name+"](tg://user?id="+str(user_id)+")"
+    query = ''
+    for i in message.command[1:]:
+        query += ' ' + str(i)
+    print(query)
+    m = await message.reply(f"**ѕєαrchíng чσur ѕσng...!\n {query}**")
+    ydl_opts = {"format": "bestaudio[ext=m4a]"}
+    try:
+        results = YoutubeSearch(query, max_results=1).to_dict()
+        link = f"https://youtube.com{results[0]['url_suffix']}"
+        title = results[0]["title"][:40]       
+        thumbnail = results[0]["thumbnails"][0]
+        thumb_name = f'thumb{title}.jpg'
+        thumb = requests.get(thumbnail, allow_redirects=True)
+        open(thumb_name, 'wb').write(thumb.content)
+        performer = f"[NETWORKS™]" 
+        duration = results[0]["duration"]
+        url_suffix = results[0]["url_suffix"]
+        views = results[0]["views"]
+    except Exception as e:
+        print(str(e))
+        return await m.edit("Example: /song vaa vaathi song")
+                
+    await m.edit("**dσwnlσαdíng чσur ѕσng...!**")
+    try:
+        with YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(link, download=False)
+            audio_file = ydl.prepare_filename(info_dict)
+            ydl.process_info(info_dict)
+
+        cap = f"**BY›› [UPDATE]({CHNL_LNK})**"
+        secmul, dur, dur_arr = 1, 0, duration.split(':')
+        for i in range(len(dur_arr)-1, -1, -1):
+            dur += (int(dur_arr[i]) * secmul)
+            secmul *= 60
+        await message.reply_audio(
+            audio_file,
+            caption=cap,            
+            quote=False,
+            title=title,
+            duration=dur,
+            performer=performer,
+            thumb=thumb_name
+        )            
+        await m.delete()
+    except Exception as e:
+        await m.edit("**🚫 𝙴𝚁𝚁𝙾𝚁 🚫**")
+        print(e)
+    try:
+        os.remove(audio_file)
+        os.remove(thumb_name)
+    except Exception as e:
+        print(e)
+
+def get_text(message: Message) -> [None,str]:
+    text_to_return = message.text
+    if message.text is None:
+        return None
+    if " " not in text_to_return:
+        return None
+    try:
+        return message.text.split(None, 1)[1]
+    except IndexError:
+        return None
+
+
+@Client.on_message(filters.command(["video", "mp4"]))
+async def vsong(client, message: Message):
+    urlissed = get_text(message)
+    pablo = await client.send_message(message.chat.id, f"**𝙵𝙸𝙽𝙳𝙸𝙽𝙶 𝚈𝙾𝚄𝚁 𝚅𝙸𝙳𝙴𝙾** `{urlissed}`")
+    if not urlissed:
+        return await pablo.edit("Example: /video Your video link")     
+    search = SearchVideos(f"{urlissed}", offset=1, mode="dict", max_results=1)
+    mi = search.result()
+    mio = mi["search_result"]
+    mo = mio[0]["link"]
+    thum = mio[0]["title"]
+    fridayz = mio[0]["id"]
+    mio[0]["channel"]
+    kekme = f"https://img.youtube.com/vi/{fridayz}/hqdefault.jpg"
+    await asyncio.sleep(0.6)
+    url = mo
+    sedlyf = wget.download(kekme)
+    opts = {
+        "format": "best",
+        "addmetadata": True,
+        "key": "FFmpegMetadata",
+        "prefer_ffmpeg": True,
+        "geo_bypass": True,
+        "nocheckcertificate": True,
+        "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
+        "outtmpl": "%(id)s.mp4",
+        "logtostderr": False,
+        "quiet": True,
     }
-    data = await db.set_channel()
-    await message.reply(f"Channel settings have been updated for Command Type {command_type} with title '{title}'")
-
-@Client.on_message(filters.command("get_channel"))
-async def get_channel_command(client: Client, message: Message):
-    user_id = message.from_user.id
-    if not ADMINS:
-        await message.reply("You do not have permission to use this command.")
-        return
-    args = message.text.split()
-    if len(args) < 2:
-        await message.reply("Usage: /get_channel <command_type>")
-        return
-    command_type = int(args[1])  # Get command_type (1, 2, 3, or 4)
-    channel_data = await db.get_channel()
-    if channel_data:
-        response = f"Command Type {command_type} settings:\n"
-        response += f"Destination Channel IDs: {', '.join(channel_data['destination_channel_ids'])}\n"
-        response += f"Original Text: {channel_data['original_text']}\n"
-        response += f"Replace Text: {channel_data['replace_text']}\n"
-        response += f"My Link: {channel_data['my_link'] if channel_data['my_link'] else 'None'}\n"
-        response += f"Web Link: {channel_data['web_link'] if channel_data['web_link'] else 'None'}\n"
-        response += f"My Username: {channel_data['my_username'] if channel_data['my_username'] else 'None'}\n"
-        response += f"Title: {channel_data['title']}\n"
-    else:
-        response = f"No settings found for Command Type {command_type}."
-
-    await message.reply(response)
+    try:
+        with YoutubeDL(opts) as ytdl:
+            ytdl_data = ytdl.extract_info(url, download=True)
+    except Exception as e:
+        return await pablo.edit_text(f"**𝙳𝚘𝚠𝚗𝚕𝚘𝚊𝚍 𝙵𝚊𝚒𝚕𝚎𝚍 𝙿𝚕𝚎𝚊𝚜𝚎 𝚃𝚛𝚢 𝙰𝚐𝚊𝚒𝚗..♥️** \n**Error :** `{str(e)}`")       
     
-@Client.on_message(filters.command("links") & filters.private)
-async def links(c: Client, m: Message):
-    ''' Start Message of the Bot !!'''
+    file_stark = f"{ytdl_data['id']}.mp4"
+    capy = f"""**𝚃𝙸𝚃𝙻𝙴 :** [{thum}]({mo})\n**𝚁𝙴𝚀𝚄𝙴𝚂𝚃𝙴𝙳 𝙱𝚈 :** {message.from_user.mention}"""
 
-    await m.reply_text(
-        text='''
-<b>🔰 Hello, I am TamilMVAutoRss and Multi-Tasking Bot! 🔰</b>
-
-<b>Get All RSS Feed Channel Links</b>''',
-        quote=True,
-        parse_mode=enums.ParseMode.HTML,
-        disable_web_page_preview=True,
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("1TamilMV", url="https://t.me/+3rd6z7uhqTxiYWM1")],
-            [InlineKeyboardButton("1TamilBlasters", url="https://t.me/+cFk95Ozi_RA2MGE1")],
-            [InlineKeyboardButton("2TamilRockers", url="https://t.me/+Un9tkoLZVz41NDk1")]
-        ])
+    await client.send_video(
+        message.chat.id,
+        video=open(file_stark, "rb"),
+        duration=int(ytdl_data["duration"]),
+        file_name=str(ytdl_data["title"]),
+        thumb=sedlyf,
+        caption=capy,
+        supports_streaming=True,        
+        reply_to_message_id=message.id 
     )
-    
-# Add multiple domains
-@Client.on_message(filters.command("set_domains") & filters.user(ADMINS))
-async def add_domains(client: Client, message: Message):
-    """
-    Adds multiple domains and associates each with its website.
-    Usage: /add_domains <url1> <url2> <url3>
-    """
-    args = message.text.split(maxsplit=3)
-    
-    if len(args) != 4:
-        await message.reply(
-            "<b>Usage :- </b><code>/set_domains [url1] [url2] [url3]</code>",
-            parse_mode=enums.ParseMode.HTML,
-            disable_web_page_preview=True
-        )
-        return
-
-    # Extract URLs
-    url1, url2, url3 = args[1], args[2], args[3]
-    
-    try:
-        # Add domains to the database with appropriate names
-        await db.update_domain("1TamilMV", url1)
-        await db.update_domain("1TamilBlasters", url2)
-        await db.update_domain("2TamilRockers", url3)
-
-        # Send a confirmation message
-        await message.reply(
-            f"<b>Domains have been Updated:</b>\n"
-            f"<b>1TamilMV :- {url1}</b>\n"
-            f"<b>1TamilBlasters :- {url2}</b>\n"
-            f"<b>2TamilRockers :- {url3}</b>",
-            parse_mode=enums.ParseMode.HTML,
-            disable_web_page_preview=True
-        )
-    except Exception as e:
-        # Log the error and notify the user
-        await message.reply(
-            f"<b>An error occurred while adding domains:</b> <code>{e}</code>",
-            parse_mode=enums.ParseMode.HTML,
-            disable_web_page_preview=True
-        )
-
-@Client.on_message(filters.command("get_domains") & filters.user(ADMINS))
-async def get_domains(client: Client, message: Message):
-    """
-    Fetches and displays all available domains from the database.
-    """
-    try:
-        # Fetch all domains from the database
-        domains = await db.get_all_domains()
+    await pablo.delete()
+    for files in (sedlyf, file_stark):
+        if files and os.path.exists(files):
+            os.remove(files)
+            
+@Client.on_message(filters.command("stickerid") & filters.private)
+async def stickerid(bot, message):
+    s_msg = await bot.ask(chat_id = message.from_user.id, text = "Now Send Me Your Sticker")
+    if s_msg.sticker:
+        await s_msg.reply_text(f"**Sticker ID is**  \n `{s_msg.sticker.file_id}` \n \n ** Unique ID is ** \n\n`{s_msg.sticker.file_unique_id}`")
+    else: 
+        await s_msg.reply_text("Oops !! Not a sticker file")
         
-        if not domains:
-            await message.reply("<b>No domains found in the database.</b>", disable_web_page_preview=True)
-            return
-        
-        # Create a formatted response
-        response = "<b>Website Domains :-</b>\n"
-        for key, url in domains.items():
-            response += f"<b>{key} :- {url}</b>\n"
-        
-        await message.reply(response, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
-    except Exception as e:
-        # Log the error and notify the user
-        await message.reply(
-            f"<b>An error occurred while fetching domains:</b> <code>{e}</code>",
-            parse_mode=enums.ParseMode.HTML,
-            disable_web_page_preview=True
-        )
-        
+@Client.on_message(filters.private & filters.command("rename"))
+async def rename_start(client, message):
+    if RENAME_MODE == False:
+        return 
+    msg = await client.ask(message.chat.id, "**Now send me your file/video/audio to rename.**")
+    if not msg.media:
+        return await message.reply("**Please send me supported media.**")
+    if msg.media in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.DOCUMENT, enums.MessageMediaType.AUDIO]:
+        file = getattr(msg, msg.media.value)
+        filename = file.file_name
+        filesize = humanize.naturalsize(file.file_size) 
+        fileid = file.file_id
+        text = f"""**__𝙿𝚕𝚎𝚊𝚜𝚎 𝙴𝚗𝚝𝚎𝚛 𝙽𝚎𝚠 𝙵𝚒𝚕𝚎𝙽𝚊𝚖𝚎...__**\n\n**File Name** :- `{filename}`\n\n**File Size** :- `{filesize}`"""
+        await message.reply_text(text)
+        kk = await client.listen(message.from_user.id)
+        await refunc(client, message, kk.text, msg)
+      

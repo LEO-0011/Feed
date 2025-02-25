@@ -23,3 +23,14 @@ psutil
 python-dotenv
 requests
 flask
+gunicorn
+wget
+youtube_search
+youtube-search-python==1.4.6
+yt-dlp
+youtube-dl
+ytthumb
+hachoir
+humanize
+Pillow==9.4.0
+
