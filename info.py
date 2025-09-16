@@ -17,17 +17,17 @@ def is_valid_ip(ip):
     return re.match(ip_pattern, ip) is not None
 
 # Bot information
-API_ID = environ.get('API_ID', '11973721')
+API_ID = environ.get('API_ID', '11472991')
 if len(API_ID) == 0:
     print('Error - API_ID is missing, exiting now')
     exit()
 else:
     API_ID = int(API_ID)
-API_HASH = environ.get('API_HASH', '5264bf4663e9159565603522f58d3c18')
+API_HASH = environ.get('API_HASH', '')
 if len(API_HASH) == 0:
     print('Error - API_HASH is missing, exiting now')
     exit()
-BOT_TOKEN = environ.get('BOT_TOKEN', '7339692339:AAFAOyRX0EdURGDLkENqT4rIBt_rfQHWCtY')
+BOT_TOKEN = environ.get('BOT_TOKEN', '')
 if len(BOT_TOKEN) == 0:
     print('Error - BOT_TOKEN is missing, exiting now')
     exit()
@@ -38,7 +38,7 @@ USER_STRING_SESSION = environ.get('USER_STRING_SESSION', '1BVtsOKEBu7SQF8Ck5YduB
 PICS = (environ.get('PICS', 'https://envs.sh/4kP.jpg')).split()
 
 # Bot Admins
-ADMINS = environ.get('ADMINS', '1391556668')
+ADMINS = environ.get('ADMINS', '')
 if len(ADMINS) == 0:
     print('Error - ADMINS is missing, exiting now')
     exit()
