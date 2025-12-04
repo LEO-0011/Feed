@@ -1,26 +1,18 @@
 import os
-import time
 import asyncio
-import uvloop
 
 # Pyrogram imports
-from pyrogram import types
 from pyrogram import Client
 from pyrogram.errors import FloodWait
 
 # aiohttp imports
 from aiohttp import web
-from typing import Union, Optional, AsyncGenerator
-
-# telethon imports 
-from telethon import TelegramClient
-from telethon.sessions import StringSession
 
 # local imports
 from web import web_app
-from info import LOG_CHANNEL, API_ID, API_HASH, BOT_TOKEN, USER_STRING_SESSION, PORT, BIN_CHANNEL, ADMINS, DATABASE_URL, TAMILMV_LOG, TAMILBLAST_LOG
+from info import LOG_CHANNEL, API_ID, API_HASH, BOT_TOKEN, PORT, BIN_CHANNEL, ADMINS, DATABASE_URL
 from utils import temp, get_readable_time
-from plugins.scrapper.tools.rss_feed import tamilmv_rss_feed, tamilblasters_rss_feed, tamilrockers_rss_feed
+from plugins.scrapper.tools.rss_feed import tamilmv_rss_feed, tamilblasters_rss_feed
 
 # pymongo and database imports
 from database.users_chats_db import db
@@ -89,33 +81,43 @@ class Bot(Client):
             exit()
         
         for admin in ADMINS:
-            await self.send_message(chat_id=admin, text="<b>✅ ʙᴏᴛ ʀᴇsᴛᴀʀᴛᴇᴅ</b>")
-        for chat in [TAMILMV_LOG, TAMILBLAST_LOG]:
-            await self.send_message(chat, "Bot Started!")
-        
-        while True:
-            print("TamilMV Scraper Running...")
-            await tamilmv_rss_feed(self)
-            
-            print("TamilBlasters Scraper Running...")
-            await tamilblasters_rss_feed(self)        
+            try:
+                await self.send_message(chat_id=admin, text="<b>✅ ʙᴏᴛ ʀᴇsᴛᴀʀᴛᴇᴅ</b>")
+            except:
+                pass
 
 async def main():
-    user_client = TelegramClient(StringSession(USER_STRING_SESSION), API_ID, API_HASH)
-    await user_client.start()
-
     bot = Bot()
     try:
         await bot.start()
         print("Bot Started Successfully")
+        
+        # Run RSS feed scrapers in background
+        asyncio.create_task(rss_scraper_loop(bot))
+        
+        await bot.idle()
     except FloodWait as vp:
         wait_time = get_readable_time(vp.value)
         print(f"Flood Wait Occurred, Sleeping For {wait_time}")
         await asyncio.sleep(vp.value)
         print("Now Ready For Deploying!")
         await bot.start()
-    
-    await bot.idle()  # This keeps the bot running until it's stopped
+
+async def rss_scraper_loop(bot):
+    """Background task for RSS feed scraping"""
+    while True:
+        try:
+            print("TamilMV Scraper Running...")
+            await tamilmv_rss_feed(bot)
+            
+            print("TamilBlasters Scraper Running...")
+            await tamilblasters_rss_feed(bot)
+            
+            # Wait 30 minutes before next scrape
+            await asyncio.sleep(1800)
+        except Exception as e:
+            print(f"Error in RSS scraper: {e}")
+            await asyncio.sleep(300)  # Wait 5 minutes on error
 
 if __name__ == "__main__":
-    asyncio.run(main())  # Replacing the deprecated loop with asyncio.run()
+    asyncio.run(main())
