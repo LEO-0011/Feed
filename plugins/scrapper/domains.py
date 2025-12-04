@@ -16,9 +16,9 @@ async def links(c: Client, m: Message):
         parse_mode=enums.ParseMode.HTML,
         disable_web_page_preview=True,
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("1TamilMV", url="https://t.me/+3rd6z7uhqTxiYWM1")],
-            [InlineKeyboardButton("1TamilBlasters", url="https://t.me/+cFk95Ozi_RA2MGE1")],
-            [InlineKeyboardButton("2TamilRockers", url="https://t.me/+Un9tkoLZVz41NDk1")]
+            [InlineKeyboardButton("1TamilMV", url="https://t.me/+1gSCxb28yHk3YmU1")],
+            [InlineKeyboardButton("1TamilBlasters", url="https://t.me/+1gSCxb28yHk3YmU1")],
+            [InlineKeyboardButton("2TamilRockers", url="https://t.me/+1gSCxb28yHk3YmU1")]
         ])
     )
     
