@@ -1,0 +1,237 @@
+# ============================================
+# 🔒 SECURITY - Never commit these files!
+# ============================================
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# Session files
+*.session
+*.session-journal
+Auto-Filter-Bot.session
+user_session.session
+my_account.session
+
+# Restart marker
+restart.txt
+
+# ============================================
+# 🐍 PYTHON
+# ============================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# ============================================
+# 📝 LOGS & TEMPORARY FILES
+# ============================================
+
+# Log files
+*.log
+*.log.*
+bot.log
+bot.log.*
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================
+# 💻 IDE & EDITORS
+# ============================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# ============================================
+# 📦 DEPENDENCIES
+# ============================================
+
+# pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============================================
+# 🗂️ PROJECT SPECIFIC
+# ============================================
+
+# Downloaded files
+downloads/
+temp/
+cache/
+
+# Backup files
+*.bak
+*.backup
+backup/
+
+# Test files
+test_*.py
+*_test.py
+tests/
+
+# Database dumps
+*.dump
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+
+# ============================================
+# 🚀 DEPLOYMENT
+# ============================================
+
+# Heroku
+.env.heroku
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Koyeb
+.koyeb/
+
+# ============================================
+# 📊 DATA FILES (if any)
+# ============================================
+
+# CSV and data files
+*.csv
+*.xlsx
+*.xls
+data/
+
+# Media files (if accidentally added)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp4
+*.mkv
+*.avi
+
+# ============================================
+# 🔐 SSH KEYS & CERTIFICATES
+# ============================================
+
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+# ============================================
+# 📱 OS SPECIFIC
+# ============================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# 📚 DOCUMENTATION BUILD
+# ============================================
+
+docs/_build/
+site/
+.mkdocs/
+
+# ============================================
+# ⚙️ CONFIG FILES (local only)
+# ============================================
+
+config.py
+config.json
+settings.json
+local_config.py
